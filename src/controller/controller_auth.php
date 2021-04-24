@@ -16,7 +16,7 @@ $getAuthLogin = function (Request $request, Response $response, array $args){
     $pass = $request->getParsedBodyParam('password');
 
     $provider = new AuthService($this->connection);
-    $result = $provider->getAuthTokenAccess($login, $pass);
+    $result = $provider->getAuthTokenAccess($login, md5($pass));
     $status = $result["status"];
     unset($result["status"]);
 
@@ -50,9 +50,7 @@ $closeAuth = function (Request $request, Response $response, array $args){
         $status = $result["status"];
         unset($result["status"]);
         return $response->withStatus($status)->withJson($result);
-
     }
-
 };
 
 
