@@ -128,14 +128,16 @@ class AuthService{
 
             if(strcmp($result['pass_user'], $pass)==0){
 
-                $token = $this->getTokenUserIfHaveTokenValido($result["id_user"]);
+                /*$token = $this->getTokenUserIfHaveTokenValido($result["id_user"]);
+                
                 if($token != null){
                     return [
                         "status"=> 200,
                         "access_token" => $token['auth_token'],
                         "time_expiry" => round($token['time_expiry'])
                     ];
-                }
+                }*/
+                $this->closeAuth($result["id_user"]);
 
                 $token = $this->createNewToken($result["id_user"]);
                 if($token == 'error'){

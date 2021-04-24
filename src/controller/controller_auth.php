@@ -1,5 +1,4 @@
 <?php
-
 namespace src\controller;
 
 require 'vendor/autoload.php';
@@ -12,9 +11,12 @@ use \Psr\Http\Message\ResponseInterface as Response;
 use src\services\AuthService;
 
 $getAuthLogin = function (Request $request, Response $response, array $args){
+    //$input = $request->getParsedBody();
+    //$inputt = json_encode($input);
     $login = $request->getParsedBodyParam('username');
     $pass = $request->getParsedBodyParam('password');
 
+    //return $response->withJson($input);
     $provider = new AuthService($this->connection);
     $result = $provider->getAuthTokenAccess($login, $pass);
     $status = $result["status"];
@@ -50,9 +52,7 @@ $closeAuth = function (Request $request, Response $response, array $args){
         $status = $result["status"];
         unset($result["status"]);
         return $response->withStatus($status)->withJson($result);
-
     }
-
 };
 
 

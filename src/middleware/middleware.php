@@ -23,5 +23,4 @@ $rotinaAuth = function ($request, $response, $next){
     }else{
         return $response->withStatus(401)->withJson(["error"=>"Não foi possivel autenticar o usuário"]);
     }
-
 };
