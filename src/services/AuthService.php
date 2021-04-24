@@ -52,7 +52,6 @@ class AuthService{
             $result = $stmt->fetch();
             return $result;
         }catch(PDOException $e){
-            print_r($e);
             return 'error';
         }
     }
@@ -73,7 +72,6 @@ class AuthService{
             $result = $stmt->fetch();
             return $result == null?null:$result['auth_id_user'];
         }catch(PDOException $e){
-            print_r($e);
             return null;
         }
 
@@ -97,7 +95,6 @@ class AuthService{
             ]);
             return $key;
         }catch(PDOException $e){
-            print_r($e);
             return null;
         }
 
@@ -249,18 +246,13 @@ class AuthService{
 
     public function inputBlackListLogin($login){
         $n_tentativas = $this->getNumTentativasLogin($login);
-        print_r($n_tentativas);
         try{
             $stmt = $this->db->prepare("INSERT INTO `black_list_login`
             (`bkls_login`, `bkls_tentativas`, `bkls_prox_login`) 
             VALUES 
             (:loginn, :n_tent,  DATE_ADD(NOW(), INTERVAL :timer MINUTE))
             ");
-            
-            for($i = 0; $i<15;$i++){
-                $var = $this->equacaoBanLogin($i);
-                print_r("$var \n");
-            }
+
             $stmt->execute([
                 ":loginn"=>$login,
                 ":n_tent"=>$n_tentativas+1,
@@ -268,7 +260,6 @@ class AuthService{
                 ]);
                 return 0;
         }catch(PDOException $e){
-            print_r($e);
             return 0;
         }
     }
