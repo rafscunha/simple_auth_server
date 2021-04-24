@@ -52,7 +52,6 @@ class AuthService{
             $result = $stmt->fetch();
             return $result;
         }catch(PDOException $e){
-            print_r($e);
             return 'error';
         }
     }
@@ -73,7 +72,6 @@ class AuthService{
             $result = $stmt->fetch();
             return $result == null?null:$result['auth_id_user'];
         }catch(PDOException $e){
-            print_r($e);
             return null;
         }
 
@@ -97,17 +95,12 @@ class AuthService{
             ]);
             return $key;
         }catch(PDOException $e){
-            print_r($e);
             return null;
         }
 
     }
 
-    //-----------------------------------------------------------------------------------------------------
-
-    public function getAuthTokenAccess($login, $pass){
-
-
+    private function checkUsername($login){
         try{
             $string = "SELECT 
                 $this->name_colum_pass as pass_user,
@@ -118,6 +111,46 @@ class AuthService{
             $stmt = $this->db->prepare($string);
             $stmt->execute([":loginn"=>$login]);
             $result = $stmt->fetch();
+            return $result;
+        }catch(PDOException $e){
+            return null;
+        }
+    }
+
+    private function getNumTentativasLogin($login){
+        try{
+            
+            $stmt = $this->db->prepare("SELECT
+                if(bkls_flag_ativo = 0, 0, bkls_tentativas) as num
+                from black_list_login
+                where bkls_login = :loginn
+                order by bkls_pk_id DESC limit 1
+            ");
+            $stmt->execute([":loginn"=>$login]);
+            $result = $stmt->fetch();
+            return $result!=null?$result['num']:0;
+        }catch(PDOException $e){
+            return null;
+        }
+    }
+
+    private function equacaoBanLogin($n){
+        if($n < 4){
+            return 0;
+        }else{
+            //return round(pow((0.4211*exp(1)),(0.8198*($n-3))));
+            return round(0.4211*exp(0.8198*($n-3)));
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------
+//******************************************************************************************** */
+    public function getAuthTokenAccess($login, $pass){
+
+
+        try{
+
+            $result = $this->checkUsername($login);
 
             if($result == null){
                 return [
@@ -125,39 +158,40 @@ class AuthService{
                     "error"=> 'Usuario não encontrado'
                 ];
             }
+            $black_list = $this->checkBlackListLogin($login);
+            if($black_list == 0){//Verifica se esta na black list de login
 
-            if(strcmp($result['pass_user'], $pass)==0){
+                if(strcmp($result['pass_user'], $pass)==0){
 
-                /*$token = $this->getTokenUserIfHaveTokenValido($result["id_user"]);
-                
-                if($token != null){
-                    return [
-                        "status"=> 200,
-                        "access_token" => $token['auth_token'],
-                        "time_expiry" => round($token['time_expiry'])
-                    ];
-                }*/
-                $this->closeAuth($result["id_user"]);
-
-                $token = $this->createNewToken($result["id_user"]);
-                if($token == 'error'){
+                    $this->closeAuth($result["id_user"]);
+    
+                    $token = $this->createNewToken($result["id_user"]);
+                    if($token == 'error'){
+                        return [
+                            "status" => 400,
+                            "error"=> 'Não foi possivel gerar o Access Token'
+                        ];
+                    }else{
+                        $this->removeBlackListLogin($login);
+                        return [
+                            "status"=> 200,
+                            "access_token" => $token,
+                            "time_expiry" => $this->time_experided
+                        ];
+                    }
+                }else {
+                    $this->inputBlackListLogin($login);
                     return [
                         "status" => 400,
-                        "error"=> 'Não foi possivel gerar o Access Token'
-                    ];
-                }else{
-                    return [
-                        "status"=> 200,
-                        "access_token" => $token,
-                        "time_expiry" => $this->time_experided
+                        "error"=> 'Senha incorreta'
                     ];
                 }
-            }else {
+            }else{
                 return [
-                    "status" => 400,
-                    "error"=> 'Senha incorreta'
+                    "status"=>200,
+                    "error"=> "É necessario espera $black_list min para realizar o login"
                 ];
-            }
+            }            
 
         }catch(PDOException $e){
             return [
@@ -167,7 +201,7 @@ class AuthService{
         }
         
     }
-
+//******************************************************************************************** */
     public function authResourceOwner($token){
         $id = $this->getIdUserByToken($token);
         if($id == null){
@@ -207,6 +241,54 @@ class AuthService{
                 "status" => 400,
                 "messege"=> "Não foi possivel encerrar a Autenticação do usuário"
             ];
+        }
+    }
+
+    public function inputBlackListLogin($login){
+        $n_tentativas = $this->getNumTentativasLogin($login);
+        try{
+            $stmt = $this->db->prepare("INSERT INTO `black_list_login`
+            (`bkls_login`, `bkls_tentativas`, `bkls_prox_login`) 
+            VALUES 
+            (:loginn, :n_tent,  DATE_ADD(NOW(), INTERVAL :timer MINUTE))
+            ");
+
+            $stmt->execute([
+                ":loginn"=>$login,
+                ":n_tent"=>$n_tentativas+1,
+                ":timer"=>$this->equacaoBanLogin($n_tentativas+1)
+                ]);
+                return 0;
+        }catch(PDOException $e){
+            return 0;
+        }
+    }
+    public function checkBlackListLogin($login){
+        try{
+            $stmt = $this->db->prepare("SELECT
+                if((bkls_prox_login > NOW()) and (bkls_flag_ativo = 1), ROUND(TIME_TO_SEC(TIMEDIFF(bkls_prox_login, NOW()))/60), 0) as num
+                from black_list_login
+                where bkls_login = :loginn
+                order by bkls_pk_id DESC limit 1
+            ");
+            $stmt->execute([":loginn"=>$login]);
+            $result = $stmt->fetch();
+            return $result!=null?$result['num']:null;
+        }catch(PDOException $e){
+            return null;
+        }
+    }
+    public function removeBlackListLogin($login){
+        try{
+            $stmt = $this->db->prepare("UPDATE black_list_login
+                SET bkls_flag_ativo = 0
+                where bkls_login = :loginn
+                order by bkls_pk_id DESC limit 1
+            ");
+            $stmt->execute([":loginn"=>$login]);
+            return 0;
+        }catch(PDOException $e){
+            return null;
         }
     }
 }
