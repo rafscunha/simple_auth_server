@@ -3,7 +3,7 @@
 $configs =[
     "db" => [
         "host" => "127.0.0.1",
-        "dbname" => "sys_termotecno",
+        "dbname" => "auth",
         "user" => "root",
         "pass" => "",
     ],

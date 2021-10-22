@@ -9,30 +9,8 @@ use PDOException;
 class AuthService{
 
     public function __construct($connection){
-        $this->db = $connection;
-
-        try{
-            $stmt = $this->db->prepare("SELECT
-                name_table_user,
-                name_colum_user,
-                name_colum_pass,
-                name_colum_login
-                FROM rl_auth_user
-                order by rl_auth_id DESC limit 1
-
-            ");
-            $stmt->execute();
-            $data = $stmt->fetch();
-            $this->name_table = $data['name_table_user'];
-            $this->name_colum_user_id = $data['name_colum_user'];
-            $this->name_colum_pass = $data['name_colum_pass'];
-            $this->name_colum_login = $data['name_colum_login'];
-        }catch(Exception $e){
-            return 'error';
-        }
-    }
-    private function compareSenha($entrada, $referencia){
-
+        $this->logger = $connection->logger;
+        $this->db = $connection->connection;
     }
 
     private function getTokenUserIfHaveTokenValido($id_user){
@@ -52,6 +30,7 @@ class AuthService{
             $result = $stmt->fetch();
             return $result;
         }catch(PDOException $e){
+            print($e);
             return 'error';
         }
     }
@@ -72,29 +51,31 @@ class AuthService{
             $result = $stmt->fetch();
             return $result == null?null:$result['auth_id_user'];
         }catch(PDOException $e){
+            print($e);
             return null;
         }
 
     }
 
     private function createNewToken($user_id, $time_experided = 36000){
-        $this->time_experided = 36000;
+        $this->time_experided = $time_experided;
         $key = hash('sha512', md5(uniqid(rand(),true)));
         try{
 
             $string = "INSERT INTO `auth_table`
-            (`auth_id_user`, `auth_token`, `auth_time_create`, `auth_time_expered`, `auth_timeout`) 
-            VALUES (:id_user, :key, NOW(), :timer, DATE_ADD(NOW(), INTERVAL :timer SECOND))
+            (`auth_id_user`, `auth_token`, `auth_timeout`) 
+            VALUES (:id_user, :key,  DATE_ADD(NOW(), INTERVAL :timer SECOND))
             ";
 
             $stmt = $this->db->prepare($string);
             $stmt->execute([
-                ":timer"=>$time_experided,
                 ":id_user"=>$user_id,
-                ":key"=>$key    
+                ":key"=>$key,
+                ":timer"=>$time_experided
             ]);
             return $key;
         }catch(PDOException $e){
+            print($e);
             return null;
         }
 
@@ -103,16 +84,17 @@ class AuthService{
     private function checkUsername($login){
         try{
             $string = "SELECT 
-                $this->name_colum_pass as pass_user,
-                $this->name_colum_user_id as id_user
-                from $this->name_table 
-                where $this->name_colum_login = :loginn
+                senha as pass_user,
+                pk_id as id_user
+                from usuario 
+                where login = :loginn
             ";
             $stmt = $this->db->prepare($string);
             $stmt->execute([":loginn"=>$login]);
             $result = $stmt->fetch();
             return $result;
         }catch(PDOException $e){
+            print($e);
             return null;
         }
     }
@@ -121,15 +103,16 @@ class AuthService{
         try{
             
             $stmt = $this->db->prepare("SELECT
-                if(bkls_flag_ativo = 0, 0, bkls_tentativas) as num
+                if(flag_ativo = 0, 0, n_tentativas) as num
                 from black_list_login
-                where bkls_login = :loginn
-                order by bkls_pk_id DESC limit 1
+                where login = :loginn
+                order by pk_id DESC limit 1
             ");
             $stmt->execute([":loginn"=>$login]);
             $result = $stmt->fetch();
             return $result!=null?$result['num']:0;
         }catch(PDOException $e){
+            print($e);
             return null;
         }
     }
@@ -143,13 +126,48 @@ class AuthService{
         }
     }
 
+    private function getScopes($id){
+        try{
+            
+            $stmt = $this->db->prepare("SELECT
+                scope
+                FROM scope
+                WHERE fk_login = :id and
+                flag_ativo = 1
+                limit 1
+            ");
+            $stmt->execute([":id"=>$id]);
+            $result = $stmt->fetch()['scope'];
+            return $result;
+        }catch(PDOException $e){
+            print($e);
+            return null;
+        }
+    }
+
+    private function timeExpired($token){
+        try{
+            
+            $stmt = $this->db->prepare("SELECT
+                auth_timeout as time_out
+                FROM auth_table
+                WHERE auth_token = :token
+            ");
+            $stmt->bindParam(":token", $token);
+            $stmt->execute();
+            $result = $stmt->fetch()['time_out'];
+            return $result;
+        }catch(PDOException $e){
+            print($e);
+            return null;
+        }
+    }
+
     //-----------------------------------------------------------------------------------------------------
 //******************************************************************************************** */
     public function getAuthTokenAccess($login, $pass){
 
-
         try{
-
             $result = $this->checkUsername($login);
 
             if($result == null){
@@ -173,10 +191,13 @@ class AuthService{
                         ];
                     }else{
                         $this->removeBlackListLogin($login);
+                        $timeOut = $this->timeExpired($token);
+                        $scope = $this->getScopes($result['id_user']);
                         return [
                             "status"=> 200,
                             "access_token" => $token,
-                            "time_expiry" => $this->time_experided
+                            "time_expiry" => $timeOut,
+                            "scopes"=>$scope
                         ];
                     }
                 }else {
@@ -194,6 +215,7 @@ class AuthService{
             }            
 
         }catch(PDOException $e){
+            print($e);
             return [
                 "status" => 400,
                 "error"=> 'Não foi possivel realizar a busca do usuario'
@@ -210,15 +232,13 @@ class AuthService{
                 "error"=> 'O token não foi autenticado'
             ];
         } else{
+            $scope = $this->getScopes($id);
             return [
                 "status" => 200,
-                "id_user"=> $id
+                "id_user"=> $id,
+                "scope"=> $scope
             ];
         }
-    }
-
-    public function revalidateToken($token, $key){//implementar com o remote_addr
-
     }
 
     public function closeAuth($key){
@@ -236,7 +256,7 @@ class AuthService{
                 "messege"=> "Autenticação do usuário encerrada com sucesso"
             ];
         }catch(PDOException $e){
-            print_r($e);
+            print($e);
             return [
                 "status" => 400,
                 "messege"=> "Não foi possivel encerrar a Autenticação do usuário"
@@ -248,7 +268,7 @@ class AuthService{
         $n_tentativas = $this->getNumTentativasLogin($login);
         try{
             $stmt = $this->db->prepare("INSERT INTO `black_list_login`
-            (`bkls_login`, `bkls_tentativas`, `bkls_prox_login`) 
+            (`login`, `n_tentativas`, `prox_login`) 
             VALUES 
             (:loginn, :n_tent,  DATE_ADD(NOW(), INTERVAL :timer MINUTE))
             ");
@@ -260,34 +280,37 @@ class AuthService{
                 ]);
                 return 0;
         }catch(PDOException $e){
+            print($e);
             return 0;
         }
     }
     public function checkBlackListLogin($login){
         try{
             $stmt = $this->db->prepare("SELECT
-                if((bkls_prox_login > NOW()) and (bkls_flag_ativo = 1), ROUND(TIME_TO_SEC(TIMEDIFF(bkls_prox_login, NOW()))/60), 0) as num
+                if((prox_login > NOW()) and (flag_ativo = 1), ROUND(TIME_TO_SEC(TIMEDIFF(prox_login, NOW()))/60), 0) as num
                 from black_list_login
-                where bkls_login = :loginn
-                order by bkls_pk_id DESC limit 1
+                where login = :loginn
+                order by pk_id DESC limit 1
             ");
             $stmt->execute([":loginn"=>$login]);
             $result = $stmt->fetch();
             return $result!=null?$result['num']:null;
         }catch(PDOException $e){
+            print($e);
             return null;
         }
     }
     public function removeBlackListLogin($login){
         try{
             $stmt = $this->db->prepare("UPDATE black_list_login
-                SET bkls_flag_ativo = 0
-                where bkls_login = :loginn
-                order by bkls_pk_id DESC limit 1
+                SET flag_ativo = 0
+                where login = :loginn
+                order by pk_id DESC limit 1
             ");
             $stmt->execute([":loginn"=>$login]);
             return 0;
         }catch(PDOException $e){
+            print($e);
             return null;
         }
     }

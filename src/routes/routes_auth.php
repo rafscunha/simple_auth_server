@@ -7,21 +7,15 @@ require 'vendor/autoload.php';
 
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
+use src\middleware\MiddleWare;
+use src\controller\ControllerAuth;
 
-$app->post('/auth/login', $getAuthLogin);
+$app->group('/auth', function() use ($app){
+    $app->post('/access', ControllerAuth::class.':getAuthLogin');
+    $app->map(['GET', 'POST'],'/close', ControllerAuth::class.':closeAuth');
 
-$app->post('/auth/resource', $getAuthResourceOwner);
-
-$app->post('/auth/close', $closeAuth);
-
-$app->get('/teste', $getTest)->add($rotinaAuth);
-
-$app->get('/lol[/{a}[/{b}]]', function(Request $request, Response $response, array $args){
-    $a = $args['a'];
-    $b = $args['b'];
-    $c = $request->get("c");
-    $d = $request->get("d");
-
-    print_r("primeiro: $a \n segundo: $b");
-    return $response;
+    $app->group('/validate', function() use ($app){    
+        $app->get('/access', ControllerAuth::class.':getResourceOwner');
+        $app->get('/resource/{scope}', ControllerAuth::class.':validateResourceOwner');
+    })->add(MiddleWare::class.':getToken');
 });

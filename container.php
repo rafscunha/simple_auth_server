@@ -1,7 +1,6 @@
 <?php
 
 require 'vendor/autoload.php';
-require 'src/services/Session.php';
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -23,8 +22,4 @@ $container['connection'] = function ($c) {
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     //$pdo->setAttribute(PDO::MYSQL_ATTR_INIT_COMMAND, 'SET NAMES utf8');
     return $pdo;
-};
-
-$container['session'] = function ($c){
-    return new Session();
 };
