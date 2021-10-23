@@ -1,0 +1,519 @@
+{
+	"info": {
+		"_postman_id": "e21e6182-7d6c-4d91-91f4-8da83333f729",
+		"name": "Auth Server",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"login\",\r\n    \"password\":\"senha\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/auth/access",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"auth",
+						"access"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Login - Sucesso",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"login\",\r\n    \"password\":\"senha errada\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/access",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"access"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 22 Oct 2021 17:16:19 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Apache/2.4.51 (Win64) OpenSSL/1.1.1l PHP/8.0.12"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "PHP/8.0.12"
+						},
+						{
+							"key": "Content-Length",
+							"value": "257"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5, max=100"
+						},
+						{
+							"key": "Connection",
+							"value": "Keep-Alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"access_token\": \"ec64e485f8644c4c1c1c73597b3bb7dd990657e9e8a620fcab6e91259f1a49965ae8db73797d96cc25fceae56b90d6a6559c95954c3a6f8f296d143d3ec6044c\",\n    \"time_expiry\": \"2021-10-23 00:16:20\",\n    \"scopes\": \"termo:application:login;termo:controller:login;termo:web:login\"\n}"
+				},
+				{
+					"name": "Login - Senha errada",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"login\",\r\n    \"password\":\"senha errada\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/access",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"access"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 22 Oct 2021 17:20:52 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Apache/2.4.51 (Win64) OpenSSL/1.1.1l PHP/8.0.12"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "PHP/8.0.12"
+						},
+						{
+							"key": "Content-Length",
+							"value": "27"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"error\": \"Senha incorreta\"\n}"
+				},
+				{
+					"name": "Login - Senha errada mais que 3 vezes",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"login\",\r\n    \"password\":\"senha errada\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/access",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"access"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 22 Oct 2021 17:21:29 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Apache/2.4.51 (Win64) OpenSSL/1.1.1l PHP/8.0.12"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "PHP/8.0.12"
+						},
+						{
+							"key": "Content-Length",
+							"value": "64"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5, max=100"
+						},
+						{
+							"key": "Connection",
+							"value": "Keep-Alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"error\": \"É necessario espera 1 min para realizar o login\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Validate Token Access",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "5d6cc6c0f149e4a9762ea89920e9cb388324fb7f043d7674b46030a4893334a05d87f6a8e85379e24b569f26ccbce0b9d460d565b0c73c6688169aec1771053a",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/auth/validate/access",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"auth",
+						"validate",
+						"access"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Validade token access",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/auth/validate/access",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"validate",
+								"access"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 22 Oct 2021 17:23:49 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Apache/2.4.51 (Win64) OpenSSL/1.1.1l PHP/8.0.12"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "PHP/8.0.12"
+						},
+						{
+							"key": "Content-Length",
+							"value": "88"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5, max=100"
+						},
+						{
+							"key": "Connection",
+							"value": "Keep-Alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id_user\": \"1\",\n    \"scope\": \"termo:application:login;termo:controller:login;termo:web:login\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Validate Scope",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "5d6cc6c0f149e4a9762ea89920e9cb388324fb7f043d7674b46030a4893334a05d87f6a8e85379e24b569f26ccbce0b9d460d565b0c73c6688169aec1771053a",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/auth/validate/resource/{scope}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"auth",
+						"validate",
+						"resource",
+						"{scope}"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Validate Scope - Escopo não pertence ao usuario",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/auth/validate/resource/termo:",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"validate",
+								"resource",
+								"termo:"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 22 Oct 2021 17:32:40 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Apache/2.4.51 (Win64) OpenSSL/1.1.1l PHP/8.0.12"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "PHP/8.0.12"
+						},
+						{
+							"key": "Content-Length",
+							"value": "15"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5, max=100"
+						},
+						{
+							"key": "Connection",
+							"value": "Keep-Alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"scope\": false\n}"
+				},
+				{
+					"name": "Validate Scope - Escopo Pertence ao usuario",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/auth/validate/resource/termo:web:login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"validate",
+								"resource",
+								"termo:web:login"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 22 Oct 2021 17:33:32 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Apache/2.4.51 (Win64) OpenSSL/1.1.1l PHP/8.0.12"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "PHP/8.0.12"
+						},
+						{
+							"key": "Content-Length",
+							"value": "14"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5, max=100"
+						},
+						{
+							"key": "Connection",
+							"value": "Keep-Alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"scope\": true\n}"
+				}
+			]
+		},
+		{
+			"name": "Close Auth",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "5d6cc6c0f149e4a9762ea89920e9cb388324fb7f043d7674b46030a4893334a05d87f6a8e85379e24b569f26ccbce0b9d460d565b0c73c6688169aec1771053a",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/auth/close",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"auth",
+						"close"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Close Auth - with bearer",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/auth/close",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"close"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 22 Oct 2021 17:43:14 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Apache/2.4.51 (Win64) OpenSSL/1.1.1l PHP/8.0.12"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "PHP/8.0.12"
+						},
+						{
+							"key": "Content-Length",
+							"value": "74"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5, max=100"
+						},
+						{
+							"key": "Connection",
+							"value": "Keep-Alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"messege\": \"Autenticação do usuário encerrada com sucesso\"\n}"
+				}
+			]
+		}
+	]
+}

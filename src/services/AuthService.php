@@ -30,7 +30,7 @@ class AuthService{
             $result = $stmt->fetch();
             return $result;
         }catch(PDOException $e){
-            print($e);
+            
             return 'error';
         }
     }
@@ -51,7 +51,7 @@ class AuthService{
             $result = $stmt->fetch();
             return $result == null?null:$result['auth_id_user'];
         }catch(PDOException $e){
-            print($e);
+            
             return null;
         }
 
@@ -75,7 +75,7 @@ class AuthService{
             ]);
             return $key;
         }catch(PDOException $e){
-            print($e);
+            
             return null;
         }
 
@@ -94,7 +94,7 @@ class AuthService{
             $result = $stmt->fetch();
             return $result;
         }catch(PDOException $e){
-            print($e);
+            
             return null;
         }
     }
@@ -112,7 +112,7 @@ class AuthService{
             $result = $stmt->fetch();
             return $result!=null?$result['num']:0;
         }catch(PDOException $e){
-            print($e);
+            
             return null;
         }
     }
@@ -140,7 +140,7 @@ class AuthService{
             $result = $stmt->fetch()['scope'];
             return $result;
         }catch(PDOException $e){
-            print($e);
+            
             return null;
         }
     }
@@ -158,7 +158,7 @@ class AuthService{
             $result = $stmt->fetch()['time_out'];
             return $result;
         }catch(PDOException $e){
-            print($e);
+            
             return null;
         }
     }
@@ -215,7 +215,7 @@ class AuthService{
             }            
 
         }catch(PDOException $e){
-            print($e);
+            
             return [
                 "status" => 400,
                 "error"=> 'Não foi possivel realizar a busca do usuario'
@@ -256,7 +256,7 @@ class AuthService{
                 "messege"=> "Autenticação do usuário encerrada com sucesso"
             ];
         }catch(PDOException $e){
-            print($e);
+            
             return [
                 "status" => 400,
                 "messege"=> "Não foi possivel encerrar a Autenticação do usuário"
@@ -280,7 +280,7 @@ class AuthService{
                 ]);
                 return 0;
         }catch(PDOException $e){
-            print($e);
+            
             return 0;
         }
     }
@@ -296,7 +296,7 @@ class AuthService{
             $result = $stmt->fetch();
             return $result!=null?$result['num']:null;
         }catch(PDOException $e){
-            print($e);
+            
             return null;
         }
     }
@@ -310,7 +310,7 @@ class AuthService{
             $stmt->execute([":loginn"=>$login]);
             return 0;
         }catch(PDOException $e){
-            print($e);
+            
             return null;
         }
     }
